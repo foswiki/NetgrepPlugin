@@ -30,12 +30,12 @@
 # initPlugin is required, all other are optional.
 # For increased performance, DISABLE handlers you don't need.
 #
-# NOTE: To interact with TWiki use the official TWiki functions
-# in the &TWiki::Func module. Do not reference any functions or
-# variables elsewhere in TWiki!!
+# NOTE: To interact with Foswiki use the official Foswiki functions
+# in the &Foswiki::Func module. Do not reference any functions or
+# variables elsewhere in Foswiki!!
 
 # =========================
-package TWiki::Plugins::NetgrepPlugin;
+package Foswiki::Plugins::NetgrepPlugin;
 
 # =========================
 use vars qw(
@@ -44,7 +44,7 @@ use vars qw(
   $perlDigestMD5Found $defaultFilter $defaultColor
 );
 
-# This should always be $Rev$ so that TWiki can determine the checked-in
+# This should always be $Rev$ so that Foswiki can determine the checked-in
 # status of the plugin. It is used by the build automation tools, so
 # you should leave it alone.
 $VERSION = '$Rev$';
@@ -61,29 +61,29 @@ sub initPlugin {
     ( $topic, $web, $user, $installWeb ) = @_;
 
     # check for Plugins.pm versions
-    if ( $TWiki::Plugins::VERSION < 1 ) {
-        &TWiki::Func::writeWarning(
+    if ( $Foswiki::Plugins::VERSION < 1 ) {
+        &Foswiki::Func::writeWarning(
             "Version mismatch between NetgrepPlugin and Plugins.pm");
         return 0;
     }
 
     # Get plugin preferences
-    $defaultRefresh = &TWiki::Func::getPreferencesValue("NETGREPPLUGIN_REFRESH")
+    $defaultRefresh = &Foswiki::Func::getPreferencesValue("NETGREPPLUGIN_REFRESH")
       || 15;
-    $defaultFilter = &TWiki::Func::getPreferencesValue("NETGREPPLUGIN_FILTER");
-    $defaultFormat = &TWiki::Func::getPreferencesValue("NETGREPPLUGIN_FORMAT")
+    $defaultFilter = &Foswiki::Func::getPreferencesValue("NETGREPPLUGIN_FILTER");
+    $defaultFormat = &Foswiki::Func::getPreferencesValue("NETGREPPLUGIN_FORMAT")
       || "(+1+)";
-    $defaultSize = &TWiki::Func::getPreferencesValue("NETGREPPLUGIN_SIZE")
+    $defaultSize = &Foswiki::Func::getPreferencesValue("NETGREPPLUGIN_SIZE")
       || "100%";
-    $defaultColor = &TWiki::Func::getPreferencesValue("NETGREPPLUGIN_COLOR")
+    $defaultColor = &Foswiki::Func::getPreferencesValue("NETGREPPLUGIN_COLOR")
       || "black";
 
     # Get plugin debug flag
-    $debug = &TWiki::Func::getPreferencesFlag("NETGREPPLUGIN_DEBUG");
+    $debug = &Foswiki::Func::getPreferencesFlag("NETGREPPLUGIN_DEBUG");
 
     # Plugin correctly initialized
-    &TWiki::Func::writeDebug(
-        "- TWiki::Plugins::NetgrepPlugin::initPlugin( $web.$topic ) is OK")
+    &Foswiki::Func::writeDebug(
+        "- Foswiki::Plugins::NetgrepPlugin::initPlugin( $web.$topic ) is OK")
       if $debug;
     return 1;
 }
@@ -92,7 +92,7 @@ sub initPlugin {
 sub commonTagsHandler {
 ### my ( $text, $topic, $web ) = @_;   # do not uncomment, use $_[0], $_[1]... instead
 
-    &TWiki::Func::writeDebug(
+    &Foswiki::Func::writeDebug(
         "- NetgrepPlugin::commonTagsHandler( $_[2].$_[1] )");
     $_[0] =~ s/( *)%NETGREP{(.*?)}%/_handleNetgrepTag( $1, $2 )/geo;
 }
@@ -113,7 +113,7 @@ sub _getUrl {
     my $cacheFile = "";
     if ($theRefresh) {
         $cacheDir =
-          TWiki::Func::getPubDir() . '/' . $installWeb . '/NetgrepPlugin';
+          Foswiki::Func::getPubDir() . '/' . $installWeb . '/NetgrepPlugin';
         $cacheDir =~ /(.*)/;
         $cacheDir = $1;    # untaint (save because only internal variables)
         $cacheFile = $cacheDir . '/_url-' . Digest::MD5::md5_hex($theUrl);
@@ -124,7 +124,7 @@ sub _getUrl {
         {
 
       # return cached version if it exists and isn't too old. 1440 = 24h * 60min
-            return TWiki::Func::readFile($cacheFile);
+            return Foswiki::Func::readFile($cacheFile);
         }
     }
 
@@ -149,7 +149,7 @@ sub _getUrl {
     my $text =
         $TWiki::Plugins::SESSION->{net}
       ? $TWiki::Plugins::SESSION->{net}->getUrl( $host, $port, $path )
-      : TWiki::Net::getUrl( $host, $port, $path );
+      : Foswiki::Net::getUrl( $host, $port, $path );
 
     if ( $text =~ /text\/plain\s*ERROR\: (.*)/s ) {
         my $msg = $1;
@@ -176,7 +176,7 @@ sub _getUrl {
         }
 
         # save text in cache file before returning it
-        TWiki::Func::saveFile( $cacheFile, $text );
+        Foswiki::Func::saveFile( $cacheFile, $text );
     }
 
     return $text;
@@ -196,17 +196,17 @@ sub _handleNetgrepTag {
             "ERROR: Cannot locate Perl module Digest::MD5" );
     }
 
-    my $href = TWiki::Func::extractNameValuePair( $theArgs, "href" )
-      || TWiki::Func::extractNameValuePair($theArgs);
-    my $filter = TWiki::Func::extractNameValuePair( $theArgs, "filter" )
-      || TWiki::Func::extractNameValuePair($theArgs);
-    my $refresh = TWiki::Func::extractNameValuePair( $theArgs, "refresh" )
+    my $href = Foswiki::Func::extractNameValuePair( $theArgs, "href" )
+      || Foswiki::Func::extractNameValuePair($theArgs);
+    my $filter = Foswiki::Func::extractNameValuePair( $theArgs, "filter" )
+      || Foswiki::Func::extractNameValuePair($theArgs);
+    my $refresh = Foswiki::Func::extractNameValuePair( $theArgs, "refresh" )
       || $defaultRefresh;
-    my $format = TWiki::Func::extractNameValuePair( $theArgs, "format" )
+    my $format = Foswiki::Func::extractNameValuePair( $theArgs, "format" )
       || $defaultFormat;
-    my $size = TWiki::Func::extractNameValuePair( $theArgs, "size" )
+    my $size = Foswiki::Func::extractNameValuePair( $theArgs, "size" )
       || $defaultSize;
-    my $color = TWiki::Func::extractNameValuePair( $theArgs, "color" )
+    my $color = Foswiki::Func::extractNameValuePair( $theArgs, "color" )
       || $defaultColor;
 
     unless ($href) {
